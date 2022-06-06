@@ -1,6 +1,11 @@
 import numpy as np
 
 def get_stokes_from_chunk(cnk,wp_ret = np.pi/2,phs_ofst = 0,verbose = False):
+    #Find the Stokes parameters using a data chunk
+    #Verbose being true makes the program tell you where the error has occurred
+    
+    #wt defines a single rotation of the wave plate, the others aside 
+    #from n0 are temporary variables that make calculations easier to track
     a0,b0,c0,d0,n0 = 0,0,0,0,0
 
     wt = np.linspace(0,2*np.pi,len(cnk))
@@ -9,35 +14,51 @@ def get_stokes_from_chunk(cnk,wp_ret = np.pi/2,phs_ofst = 0,verbose = False):
     b0 = np.trapz(cnk*np.sin(2*(wt-phs_ofst)),wt)/np.pi
     c0 = np.trapz(cnk*np.cos(4*(wt-phs_ofst)),wt)/np.pi
     d0 = np.trapz(cnk*np.sin(4*(wt-phs_ofst)),wt)/np.pi
-
+    
+    #n0 is used to flag if the alignment of the system is working,
+    #and should be clse to 0
+    
+    
+    #These two variabless are corrections to the Stokes parameters
     cd = np.cos(wp_ret)
     sd = np.sin(wp_ret)
 
+    #The Stokes parameters
     S0 = 2*(a0 - c0*(1+cd)/(1-cd))
     S1 = 4*c0/(1-cd)
     S2 = 4*d0/(1-cd)
     S3 = -2*b0/sd
     
+    #The normalization constant of the light, defined this way to allow for logic flag
     nrm = S0
     
     if nrm == 0:
         if verbose:
             print('Error! S0 = 0. Something went terribly wrong')
-        nrm=1 #This is probably sketchy
+        nrm=1 #This is probably sketchy (how else does science get done?)
     
     if n0 > np.sqrt(S1**2 + S2**2 + S3**2)*1e-3 and verbose:
-        print(f'Warning, large sin(2w) conponent detected ({n0}). Check alignment!')
+        print(f'Warning, large cos(2w) conponent detected ({n0}). Check alignment!')
     
     return np.array([S0,S1,S2,S3])/nrm
 
 def extract_triggers(trig_dat,thrsh=1,schmidt = 10):
+    #Find the data corresponding to when the magnetic ball 
+    #aligns with the Hull detector.
+    
+    #The deadzone prevents recording of multiple events per rotation.
+    #Care should be taken to chose a value that doesn't 
+    #cause triggers to be missed
     trigz = np.array([])
     deadzone = 0
     for d in range(len(trig_dat)-1):
         deadzone = max(0,deadzone-1)
-        if trig_dat[d+1] - trig_dat[d] > thrsh and deadzone is 0:
+        if trig_dat[d+1] - trig_dat[d] > thrsh and deadzone == 0:
             trigz = np.append(trigz,int(d))
             deadzone = schmidt
+            
+            #This information can be synced up to the intial data 
+            #to interpolate where it is in the rotation cycle.
     return trigz.astype(int)
 
 def get_polarization_ellipse(S,n_points = 200,scale_by_dop = True, verbose = False):
