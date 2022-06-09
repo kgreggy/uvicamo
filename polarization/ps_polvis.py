@@ -265,5 +265,5 @@ def animate_fun(idx):
     pt._offsets3d = ([x0],[y0],[z0])
     return ln1, bar, txt1, 
     
-annie = animation.FuncAnimation(fig,animate_fun,init_func = init_animation, interval = 250)
+annie = animation.FuncAnimation(fig,animate_fun,init_func = init_animation, interval = 150)
 plt.show()
