@@ -221,5 +221,5 @@ def animate_fun(idx):
     
     return ln1, bar, txt1, ln3,
     
-annie = animation.FuncAnimation(fig,animate_fun,init_func = init_animation, interval = 250)
+annie = animation.FuncAnimation(fig,animate_fun,init_func = init_animation, interval = 150)
 plt.show()
