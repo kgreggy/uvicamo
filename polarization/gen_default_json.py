@@ -43,9 +43,9 @@ else:
 if os.path.isfile(daq_settings_file):
 	print(f'Found DAQ data file: {daq_settings_file}... Skipping')
 else:
-	daq_dict = {	'samples_per_channel': 1000,
-					'scan_rate': 20000,
-					'channels': [0,2],
+	daq_dict = {	'samples_per_channel': 2000,
+					'scan_rate': 28750,
+					'channels': [1,2],
                                         'timeout': 5
 				}
 	print(f'No DAQ json file found. Creating file: {daq_settings_file}')
